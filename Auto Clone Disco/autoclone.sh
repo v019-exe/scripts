@@ -6,6 +6,8 @@ echo -e "\033[0;35m
 | |/ / _ \/ / _  / 
 |___/\___/_/\_,_/  
                    
+[*] Github: github.com/v019-exe
+[*] Script hecha por v019.exe
 \033[0m"
 
 if [ "$EUID" -ne 0 ]
