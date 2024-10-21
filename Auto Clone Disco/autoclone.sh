@@ -96,7 +96,7 @@ autoclone() {
 					echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al formatear el disco"
 				else
 					echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Disco reformateado correctamente"
-					sudo mount $montaje
+					sudo mount $ruta $montaje
 					if [ $? -ne 0 ]; then
 						echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al remontar el disco en $montaje"
 					else
