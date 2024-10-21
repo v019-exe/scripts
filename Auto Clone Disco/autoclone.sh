@@ -90,7 +90,7 @@ autoclone() {
             else
                 echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Disco desmontado correctamente"
 				echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Reformateando el disco $ruta"
-				sudo mkfs.ext4 $ruta
+				sudo mkfs.ext4 -F "$ruta"
 				if [ $? -eq 0 ]; then
 					echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al formatear el disco"
 				else
