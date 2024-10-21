@@ -107,7 +107,8 @@ autoclone() {
 						else
 							echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Se ha creado correctamente la imagen, $imagen"
 							hash_despues=$(md5sum $imagen | awk '{print $1}')
-
+							echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: La imagen ha sido hasheada, el hash es: $hash_despues"
+							echo -e "[\e[43mWARN\e[0m][$(date +"%H:%M:%S")]: Comparando hash del disco anterior con el hash actual..., $hash"
 							if [ "$hash" = "$hash_despues" ]; then
 								echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: El hash es igual, la copia ha tenido éxito"
 							else
