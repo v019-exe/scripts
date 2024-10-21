@@ -91,18 +91,18 @@ autoclone() {
                 echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Disco desmontado correctamente"
 				echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Reformateando el disco $ruta"
 				sudo mkfs.ext4 -F "$ruta"
-				if [ $? -eq 0 ]; then
+				if [ $? -ne 0 ]; then
 					echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al formatear el disco"
 				else
 					echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Disco reformateado correctamente"
 					sudo mount $montaje
-					if [ $? -eq 0 ]; then
+					if [ $? -ne 0 ]; then
 						echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al remontar el disco en $montaje"
 					else
 						echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Disco montado correctamente en $montaje"
 						echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Creando la imagen del disco"
 						sudo dd if=$ruta of=$imagen bs=4M
-						if [ $? -eq 0 ]; then
+						if [ $? -ne 0 ]; then
 							echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al crear la imagen"
 						else
 							echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Se ha creado correctamente la imagen, $imagen"
