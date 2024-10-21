@@ -75,9 +75,9 @@ autoclone() {
             fi
 
             echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Hasheando el fichero usando md5"
-            hash=$(md5sum $ruta_fichero/$fichero | awk '{print $1}')
+            hash=$(md5sum $ruta | awk '{print $1}')
             if [ $? -eq 0 ]; then
-                echo -e "[\e[32mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Hash del fichero: $hash"
+                echo -e "[\e[32mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Hash del disco: $hash"
             else
                 echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al hacer el hash del archivo ubicado en $ruta_fichero"
             fi
