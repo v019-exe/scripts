@@ -23,6 +23,8 @@ echo -ne "[\033[0;35m\e[1mVOID\e[0m\033[0m][$(date +"%H:%M:%S")]: Contenido del 
 read contenido
 echo -ne "[\033[0;35m\e[1mVOID\e[0m\033[0m][$(date +"%H:%M:%S")]: Ruta del fichero: "
 read ruta_fichero
+echo -ne "[\033[0;35m\e[1mVOID\e[0m\033[0m][$(date +"%H:%M:%S")]: Ruta de la imagen (incluye el nombre de la img): "
+read imagen
 
 autoclone() {
     echo -e "[\e[34mINFO\e[0m][$(date +"%H:%M:%S")]: Comprobando si el disco existe..."
@@ -87,6 +89,34 @@ autoclone() {
                 echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al desmontar el disco"
             else
                 echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Disco desmontado correctamente"
+				echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Reformateando el disco $ruta"
+				sudo mkfs.ext4 $ruta
+				if [ $? -eq 0 ]; then
+					echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al formatear el disco"
+				else
+					echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Disco reformateado correctamente"
+					sudo mount $montaje
+					if [ $? -eq 0 ]; then
+						echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al remontar el disco en $montaje"
+					else
+						echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Disco montado correctamente en $montaje"
+						echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Creando la imagen del disco"
+						sudo dd if=$ruta of=$imagen bs=4M
+						if [ $? -eq 0 ]; then
+							echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al crear la imagen"
+						else
+							echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Se ha creado correctamente la imagen, $imagen"
+							hash_despues=$(md5sum $imagen | awk '{print $1}')
+
+							if [ $hash -eq $hash_despues ]; then
+								echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: El hash es igual, la copia ha tenido éxito"
+							else
+								echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: El hash no es igual, error al crear la copia"
+								return
+							fi
+						fi
+					fi
+				fi
             fi
 
         else
