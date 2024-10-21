@@ -118,7 +118,6 @@ autoclone() {
 					fi
 				fi
             fi
-
         else
             echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: El punto de montaje no existe"
         fi
