@@ -40,8 +40,7 @@ autoclone() {
 			echo -e "[\e[43mWARN\e[0m][$(date +"%H:%M:%S")]: El disco no tiene formato"
 			echo -e "[\e[43mWARN\e[0m][$(date +"%H:%M:%S")]: Formateando con ext4"
 			
-			# Formatear el disco con ext4
-			sudo mkfs.ext4 "$ruta"
+			sudo mkfs.ext4 "$ruta" > /dev/null
 			
 			if [ $? -ne 0 ]; then
 				echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al formatear el disco"
@@ -59,7 +58,7 @@ autoclone() {
             if mount | grep "on $ruta" > /dev/null; then
                 echo -e "[\e[33mWARN\e[0m][$(date +"%H:%M:%S")]: El disco ya está montado"
             else
-                sudo mount $ruta $montaje
+                sudo mount $ruta $montaje > /dev/null
                 if [ $? -ne 0 ]; then
                     echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al montar el disco"
                     return
@@ -84,32 +83,32 @@ autoclone() {
             fi
 
             echo -e "[\e[33mWARN\e[0m][$(date +"%H:%M:%S")]: Intentando desmontar el disco de $montaje"
-            sudo umount $montaje
+            sudo umount $montaje > /dev/null
             if [ $? -ne 0 ]; then
                 echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al desmontar el disco"
             else
                 echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Disco desmontado correctamente"
 				echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Reformateando el disco $ruta"
-				sudo mkfs.ext4 -F "$ruta"
+				sudo mkfs.ext4 -F "$ruta" > /dev/null
 				formato_result=$?
 				if [ $formato_result -ne 0 ]; then
 					echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al formatear el disco"
 				else
 					echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Disco reformateado correctamente"
-					sudo mount $ruta $montaje
+					sudo mount $ruta $montaje > /dev/null
 					if [ $? -ne 0 ]; then
 						echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al remontar el disco en $montaje"
 					else
 						echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Disco montado correctamente en $montaje"
 						echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Creando la imagen del disco"
-						sudo dd if=$ruta of=$imagen bs=4M
+						sudo dd if=$ruta of=$imagen bs=4M > /dev/null
 						if [ $? -ne 0 ]; then
 							echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al crear la imagen"
 						else
 							echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Se ha creado correctamente la imagen, $imagen"
 							hash_despues=$(md5sum $imagen | awk '{print $1}')
 
-							if [ "$hash" -eq "$hash_despues" ]; then
+							if [ "$hash" = "$hash_despues" ]; then
 								echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: El hash es igual, la copia ha tenido éxito"
 							else
 								echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: El hash no es igual, error al crear la copia"
