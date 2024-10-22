@@ -1,5 +1,7 @@
 #!/bin/bash
 
+clear
+
 echo -e "\033[0;35m
             _    __
  _  _____  (_)__/ /
@@ -29,19 +31,17 @@ echo -ne "[\033[0;35m\e[1mVOID\e[0m\033[0m][$(date +"%H:%M:%S")]: Ruta de la ima
 read imagen
 
 autoclone() {
-    echo -e "[\e[34mINFO\e[0m][$(date +"%H:%M:%S")]: Comprobando si el disco existe..."
+    echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Comprobando si el disco existe..."
     if [ -e "$ruta" ]; then
-        echo -e "[\e[34mINFO\e[0m][$(date +"%H:%M:%S")]: El disco duro existe"
+        echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: El disco duro existe"
 
-		echo -e "[\e[34mINFO\e[0m][$(date +"%H:%M:%S")]: Comprobando el particionamiento..."
+		echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Comprobando el particionamiento..."
 		if [ -b "$ruta" ] && blkid "$ruta" > /dev/null; then
 			FSTYPE=$(lsblk -nr -o FSTYPE /dev/sda | head -n 3 | tr -d '\n')
-			
-			echo -e "[\e[34mINFO\e[0m][$(date +"%H:%M:%S")]: El disco está formateado con $FSTYPE"
+			echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: El disco está formateado con $FSTYPE"
 		else
-			echo -e "[\e[43mWARN\e[0m][$(date +"%H:%M:%S")]: El disco no tiene formato"
+            echo -e "[\e[43mWARN\e[0m][$(date +"%H:%M:%S")]: El disco no tiene formato"
 			echo -e "[\e[43mWARN\e[0m][$(date +"%H:%M:%S")]: Formateando con ext4"
-			
 			sudo mkfs.ext4 "$ruta" > /dev/null
 			
 			if [ $? -ne 0 ]; then
@@ -69,57 +69,40 @@ autoclone() {
                 fi
             fi
 
-            echo $contenido > $ruta_fichero/$fichero
+            echo "$contenido" > "$ruta_fichero/$fichero"
             if [ $? -ne 0 ]; then
                 echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al crear el fichero en $ruta_fichero"
             else
                 echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Fichero creado correctamente"
             fi
 
-            echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Hasheando el fichero usando md5"
-            hash=$(md5sum $ruta | awk '{print $1}')
+            echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Borrando el archivo $fichero"
+            sudo rm -rf "$ruta_fichero/$fichero"
             if [ $? -eq 0 ]; then
-                echo -e "[\e[32mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Hash del disco: $hash"
+                echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Archivo borrado correctamente"
             else
-                echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al hacer el hash del archivo ubicado en $ruta_fichero"
+                echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al borrar el archivo"
             fi
 
-            echo -e "[\e[33mWARN\e[0m][$(date +"%H:%M:%S")]: Intentando desmontar el disco de $montaje"
-            sudo umount $montaje > /dev/null
-            if [ $? -ne 0 ]; then
-                echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al desmontar el disco"
+            echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Hasheando el fichero usando md5"
+            hash=$(md5sum "$ruta" | awk '{print $1}')
+            echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Hash del disco: $hash"
+            if [ $? -eq 0 ]; then
+                echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Hash del disco: $hash"
+                sudo dd if=$ruta of=$imagen bs=4M status=progress 2> /dev/null
+                if [ $? -eq 0 ]; then
+                    echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Se ha creado la imagen correctamente."
+                    hash_imagen=$(md5sum "$imagen" | awk '{ print $1 }')
+                    if [ "$hash" == "$hash_imagen" ]; then
+                        echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Los hashes coinciden, imagen creada correctamente"
+                    else
+                        echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Los hashes no coinciden, imagen errónea"
+                    fi
+                else
+                    echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al crear la imagen del disco."
+                fi
             else
-                echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Disco desmontado correctamente"
-				echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Reformateando el disco $ruta"
-				sudo mkfs.ext4 -F "$ruta" > /dev/null
-				formato_result=$?
-				if [ $formato_result -ne 0 ]; then
-					echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al formatear el disco"
-				else
-					echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Disco reformateado correctamente"
-					sudo mount $ruta $montaje > /dev/null
-					if [ $? -ne 0 ]; then
-						echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al remontar el disco en $montaje"
-					else
-						echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Disco montado correctamente en $montaje"
-						echo -e "[\e[44mINFO\e[0m][$(date +"%H:%M:%S")]: Creando la imagen del disco"
-						sudo dd if=$ruta of=$imagen bs=4M > /dev/null
-						if [ $? -ne 0 ]; then
-							echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al crear la imagen"
-						else
-							echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: Se ha creado correctamente la imagen, $imagen"
-							hash_despues=$(md5sum $imagen | awk '{print $1}')
-							echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: La imagen ha sido hasheada, el hash es: $hash_despues"
-							echo -e "[\e[43mWARN\e[0m][$(date +"%H:%M:%S")]: Comparando hash del disco anterior con el hash actual..., $hash"
-							if [ "$hash" = "$hash_despues" ]; then
-								echo -e "[\e[42mSUCCESS\e[0m][$(date +"%H:%M:%S")]: El hash es igual, la copia ha tenido éxito"
-							else
-								echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: El hash no es igual, error al crear la copia"
-								return
-							fi
-						fi
-					fi
-				fi
+                echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: Error al hacer el hash del archivo ubicado en $ruta_fichero"
             fi
         else
             echo -e "[\e[41mERROR\e[0m][$(date +"%H:%M:%S")]: El punto de montaje no existe"
