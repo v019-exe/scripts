@@ -1,10 +1,10 @@
 #!/bin/bash
-mount /dev/sdXn /mnt  # Cambia sdXn por tu partición raíz
+mount /dev/sdXn /mnt
 mount --bind /dev /mnt/dev
 mount --bind /proc /mnt/proc
 mount --bind /sys /mnt/sys
 chroot /mnt
-grub-install /dev/sdX  # Cambia sdX por tu disco
+grub-install /dev/sdX
 update-grub
 exit
 reboot
